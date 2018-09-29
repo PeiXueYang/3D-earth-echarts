@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+        <script src="./static/plugin/xlsx/xlsx.full.min.js"></script>
+    </head>
+    <body>
+        <input type="file" onchange="importf(this)" />
+        <div id="demo"></div>
+        <script>
+
+            var totalTrading,  //总交易量
+                goodsDistribution = [], //货物分布
+                goodsTrend1 = [], //主流货种趋势1
+                goodsTrend2 = [], //主流货种趋势2
+                goodsTrend3 = [], //主流货种趋势3
+                transportOrder = [], //运输订单
+                jingWeiDu = [] ,//经纬度
+                liShiJiaoYiLiang = [] ,//历史交易量
+                ships = [] , //运输船舶
+                zhiShu = [] ,//指数
+                price = [] //运输价格
+            /*
+            FileReader共有4种读取方法：
+            1.readAsArrayBuffer(file)：将文件读取为ArrayBuffer。
+            2.readAsBinaryString(file)：将文件读取为二进制字符串
+            3.readAsDataURL(file)：将文件读取为Data URL
+            4.readAsText(file, [encoding])：将文件读取为文本，encoding缺省值为'UTF-8'
+                         */
+            var wb;//读取完成的数据
+            var rABS = true; //是否将文件读取为二进制字符串
+
+            function importf(obj) 
+            {
+                //导入
+                if(!obj.files) {
+                    return;
+                }
+
+                clearAll(); //清除所有store内的数据
+
+                var f = obj.files[0];
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var data = e.target.result;
+                    if(rABS) 
+                    {
+                        wb = XLSX.read(btoa(fixdata(data)), {//手动转化
+                            type: 'base64'
+                        });
+                    } 
+                    else 
+                    {
+                        wb = XLSX.read(data, {
+                            type: 'binary'
+                        });
+
+                        console.log( wb );
+                    }
+                    //wb.SheetNames[0]是获取Sheets中第一个Sheet的名字
+                    //wb.Sheets[Sheet名]获取第一个Sheet的数据
+                    // document.getElementById("demo").innerHTML= JSON.stringify( XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]) ) ;
+
+                    
+                    //获取总交易量
+                    getTotalTrading( XLSX.utils.sheet_to_json( wb.Sheets[wb.SheetNames[0]] ) );
+                    
+                    //货种分布
+                    getGoodsDistribution(  XLSX.utils.sheet_to_json( wb.Sheets[wb.SheetNames[1]] )  );
+
+                    //主流货种趋势1
+                    getGoodsTrend1(  XLSX.utils.sheet_to_json( wb.Sheets[wb.SheetNames[2]] )  );
+
+                    //主流货种趋势2
+                    getGoodsTrend2(  XLSX.utils.sheet_to_json( wb.Sheets[wb.SheetNames[3]] )  );
+                    //主流货种趋势3
+                    getGoodsTrend3(  XLSX.utils.sheet_to_json( wb.Sheets[wb.SheetNames[4]] )  );
+
+                    //获取运输订单
+                    getTransportOrder(  XLSX.utils.sheet_to_json( wb.Sheets[wb.SheetNames[5]] )  );
+
+                    //获取经纬度
+                    getJingWeiDu(  XLSX.utils.sheet_to_json( wb.Sheets[wb.SheetNames[6]] )  );
+
+                    //获取历史交易量
+                    getLiShiJiaoYiLiang(  XLSX.utils.sheet_to_json( wb.Sheets[wb.SheetNames[7]] )  );
+
+                    //获取运输船舶
+                    getShips(  XLSX.utils.sheet_to_json( wb.Sheets[wb.SheetNames[8]] )  );
+
+                    //获取运价指数
+                    getIndex(  XLSX.utils.sheet_to_json( wb.Sheets[wb.SheetNames[9]] )  );
+
+                    //获取运输价格
+                    getPrice(  XLSX.utils.sheet_to_json( wb.Sheets[wb.SheetNames[10]] )  );
+                    
+
+                    // 向数据库插入数据
+                    // 插入交易总量数据
+                    addTotalTrading( totalTrading );
+
+                    // 插入货种分布数据
+                    addGoodsDis( goodsDistribution );
+
+                    //插入主流货种趋势1
+                    addGoodsTrend1( goodsTrend1 );
+
+                    //插入主流货种趋势2
+                    addGoodsTrend2( goodsTrend2 );
+
+                    //插入主流货种趋势3
+                    addGoodsTrend3( goodsTrend3 );
+ 
+                    //插入运输订单
+                    addTransOrder(  transportOrder );
+
+                    //插入经纬度
+                    addJingWeiDu(  jingWeiDu );
+
+
+                    //插入历史交易量
+                    addLiShiJiaoYiLiang( liShiJiaoYiLiang );
+
+                    //插入船舶数据
+                    addShips( ships );
+
+                    //插入运价指数数据
+                    addZhiShu( zhiShu );
+
+                    //插入运价价格数据
+                    addPrice( price );
+
+
+
+                };
+                if(rABS) {
+                    reader.readAsArrayBuffer(f);
+                } else {
+                    reader.readAsBinaryString(f);
+                }
+            }
+
+            function fixdata(data) 
+            { 
+                //文件流转BinaryString
+                var o = "",
+                    l = 0,
+                    w = 10240;
+                for(; l < data.byteLength / w; ++l) o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w, l * w + w)));
+                o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w)));
+                return o;
+            }
+
+            /************************获取表格中的数据 begin************************/
+
+
+            // （1）读取sheet1--累计交易量
+            function getTotalTrading(data) 
+            {
+                let key =  Object.keys( data[0] ) ;
+                totalTrading = { "amount" :  data[0][key] }
+                console.log( "总交易量" , totalTrading );    
+            }
+
+            // （2）读取sheet2--货种分布
+            function getGoodsDistribution(data) 
+            {
+                
+                key1 = Object.keys( data[0] )[0] ;
+                key2 = Object.keys( data[0] )[1] ;
+                for( let i in data )
+                {
+                   
+                    let val1 =  data[i][key1] ;
+                    let val2 =  data[i][key2] ;
+
+                    goodsDistribution.push( { "good" : val1 , "ton" : val2 } );
+                }
+                    console.log("货种分布" , goodsDistribution);
+               
+            }
+
+             // （3）读取sheet3--主流货种趋势1
+            function getGoodsTrend1(data) 
+            {
+                
+                key1 = Object.keys( data[0] )[0] ;
+                key2 = Object.keys( data[0] )[1] ;
+                key3 = Object.keys( data[0] )[2] ;
+                for( let i in data )
+                {
+                   
+                    let val1 =  data[i][key1] ;
+                    let val2 =  data[i][key2] ;
+                    let val3 =  data[i][key3] ;
+
+                    goodsTrend1.push( { "good" : val1 , "date" : val2 , "ton" : val3 } );
+                }
+                    console.log("主流货种趋势1" , goodsTrend1);
+               
+            }
+
+            // （4）读取sheet4--主流货种趋势2
+            function getGoodsTrend2(data) 
+            {
+                
+                key1 = Object.keys( data[0] )[0] ;
+                key2 = Object.keys( data[0] )[1] ;
+                key3 = Object.keys( data[0] )[2] ;
+                for( let i in data )
+                {
+                   
+                    let val1 =  data[i][key1] ;
+                    let val2 =  data[i][key2] ;
+                    let val3 =  data[i][key3] ;
+
+                    goodsTrend2.push( { "good" : val1 , "date" : val2 , "ton" : val3 } );
+                }
+                    console.log("主流货种趋势2" , goodsTrend2);
+               
+            }
+
+            // （5）读取sheet5--主流货种趋势3
+            function getGoodsTrend3(data) 
+            {
+                
+                key1 = Object.keys( data[0] )[0] ;
+                key2 = Object.keys( data[0] )[1] ;
+                key3 = Object.keys( data[0] )[2] ;
+                for( let i in data )
+                {
+                   
+                    let val1 =  data[i][key1] ;
+                    let val2 =  data[i][key2] ;
+                    let val3 =  data[i][key3] ;
+
+                    goodsTrend3.push( { "good" : val1 , "date" : val2 , "ton" : val3 } );
+                }
+                    console.log("主流货种趋势3" , goodsTrend3);
+               
+            }
+
+            // （6）读取sheet6--运输订单
+            function getTransportOrder(data) 
+            {
+                
+                key1 = Object.keys( data[0] )[0] ;
+                key2 = Object.keys( data[0] )[1] ;
+                key3 = Object.keys( data[0] )[2] ;
+                key4 = Object.keys( data[0] )[3] ;
+                for( let i in data )
+                {
+                   
+                    let val1 =  data[i][key1] ;
+                    let val2 =  data[i][key2] ;
+                    let val3 =  data[i][key3] ;
+                    let val4 =  data[i][key4] ;
+
+                    transportOrder.push( { "good" : val1 , "loading" : val2 , "discharge" : val3, "ton" : val4 } );
+                }
+                    console.log("运输订单" , transportOrder);
+               
+            }
+
+            // （7）读取sheet7--经纬度
+            function getJingWeiDu(data) 
+            {
+                
+                pos1Name = Object.keys( data[0] )[0] ;
+                pos1Jing = Object.keys( data[0] )[1] ;
+                pos1Wei = Object.keys( data[0] )[2] ;
+                pos2Name = Object.keys( data[0] )[3] ;
+                pos2Jing = Object.keys( data[0] )[4] ;
+                pos2Wei = Object.keys( data[0] )[5] ;
+
+                for( let i in data )
+                {
+                   
+                    let val1 =  data[i][pos1Name] ;
+                    let val2 =  data[i][pos1Jing] ;
+                    let val3 =  data[i][pos1Wei] ;
+                    let val4 =  data[i][pos2Name] ;
+                    let val5 =  data[i][pos2Jing] ;
+                    let val6 =  data[i][pos2Wei] ;
+               
+                    jingWeiDu.push( { "pos1Name":val1 , "pos1Jing" : val2 , "pos1Wei" : val3 , "pos2Name":val4 , "pos2Jing" : val5 , "pos2Wei" : val6  } );
+                }
+                    console.log("经纬度" , jingWeiDu);
+               
+            }
+
+
+            // （8）读取sheet8--历史交易量
+            function getLiShiJiaoYiLiang(data) 
+            {
+                
+                key1 = Object.keys( data[0] )[0] ;
+                key2 = Object.keys( data[0] )[1] ;
+                key3 = Object.keys( data[0] )[2] ;
+               
+                for( let i in data )
+                {
+                   
+                    let val1 =  data[i][key1] ;
+                    let val2 =  data[i][key2] ;
+                    let val3 =  data[i][key3] ;
+               
+                    liShiJiaoYiLiang.push( { "date" : val1 , "ton" : val2 , "offset" : val3  } );
+                }
+                    console.log("历史交易量" , liShiJiaoYiLiang);
+               
+            }
+
+
+             // （9）读取sheet9--运输船舶
+            function getShips(data) 
+            {
+                
+                key1 = Object.keys( data[0] )[0] ;
+                key2 = Object.keys( data[0] )[1] ;
+               
+                for( let i in data )
+                {
+                   
+                    let val1 =  data[i][key1] ;
+                    let val2 =  data[i][key2] ;
+               
+                    ships.push( { "ship" : val1 , "ton" : val2  } );
+                }
+                    console.log("运输船舶" , ships);
+               
+            }
+
+            // （10）读取sheet10--运价指数
+            function getIndex(data) 
+            {
+                
+                key1 = Object.keys( data[0] )[0] ;
+                key2 = Object.keys( data[0] )[1] ;
+               
+                for( let i in data )
+                {
+                   
+                    let val1 =  data[i][key1] ;
+                    let val2 =  data[i][key2] ;
+               
+                    zhiShu.push( { "date" : val1 , "index" : val2  } );
+                }
+                    console.log("运价指数" , zhiShu);
+               
+            }
+
+            // （11）读取sheet11--运输价格
+            function getPrice(data) 
+            {
+                
+                key1 = Object.keys( data[0] )[0] ;
+                key2 = Object.keys( data[0] )[1] ;
+                key3 = Object.keys( data[0] )[2] ;
+                key4 = Object.keys( data[0] )[3] ;
+                key5 = Object.keys( data[0] )[4] ;
+                key6 = Object.keys( data[0] )[5] ;
+               
+                for( let i in data )
+                {
+                   
+                    let val1 =  data[i][key1] ;
+                    let val2 =  data[i][key2] ;
+                    let val3 =  data[i][key3] ;
+                    let val4 =  data[i][key4] ;
+                    let val5 =  data[i][key5] ;
+                    let val6 =  data[i][key6] ;
+               
+                    price.push( { 
+                        "hangxian" : val1 , 
+                        "ton" : val2 , 
+                        "low" : val3 , 
+                        "offset1" : val4 , 
+                        "high" :val5,
+                        "offset2":val6 
+                    });
+
+                }
+                    console.log("运输价格" , price);
+               
+            }
+
+        /************************获取表格中的数据 end************************/
+
+
+        /************************数据库操作 begin************************/
+
+        
+        const DB_NAME = "bigdata";
+        const TOTALTRADING = "totalTrading" ;//总交易量表
+        const GOODSDISTRIBUTION = "goodsDistribution" ;//货种分布表
+        const GOODSTREND1 = "goodsTrend1" ;//主流货种趋势1
+        const GOODSTREND2 = "goodsTrend2" ;//主流货种趋势2
+        const GOODSTREND3 = "goodsTrend3" ;//主流货种趋势3
+        const TRANSORDER = "transOrder" ;//运输订单
+        const JINGWEIDU = "jingweidu" ;//经纬度
+        const LISHIJIAOYILIANG = "lishijiaoyiliang" ;//历史交易量
+        const SHIPS = "ships" ;//船舶数据
+        const ZHISHU = "zhishu" ;//指数数据
+        const PRICE = "price" ;//运价价格
+
+        var db ;
+
+
+        // 连接数据库，没有就创建数据库
+        var request = indexedDB.open( DB_NAME, 1 );
+
+        request.onsuccess = function(event){
+
+            db = request.result;
+            console.log( "success" );
+
+            // add();
+            // search();
+            // deleteTable();
+
+        }
+        // 错误处理程序在这里。
+        request.onerror = function(event) {
+            console.log(event.target.error);
+        };
+
+
+        request.onupgradeneeded = function(event) {
+
+
+
+          db = event.target.result;
+
+
+          // 创建总量表
+          if (!db.objectStoreNames.contains(TOTALTRADING))
+          {
+
+            var objectStore = db.createObjectStore(TOTALTRADING , {keyPath:"id" , autoIncrement:true} );
+            console.log( "创建customer" , objectStore );
+
+          }
+          else
+          {
+            console.log('exists');
+
+          }
+
+          // 创建货种分布表
+          if (!db.objectStoreNames.contains(GOODSDISTRIBUTION))
+          {
+
+            var objectStore = db.createObjectStore(GOODSDISTRIBUTION , {keyPath:"id" , autoIncrement:true} );
+            console.log( "货种分布表" , objectStore );
+
+          }
+          else
+          {
+            console.log('exists');
+
+          }
+
+          // 创建主流货种趋势1表
+          if (!db.objectStoreNames.contains(GOODSTREND1))
+          {
+
+            var objectStore = db.createObjectStore(GOODSTREND1 , {keyPath:"id" , autoIncrement:true} );
+            console.log( "创建主流货种趋势1表" , objectStore );
+
+          }
+          else
+          {
+            console.log('exists');
+
+          }
+
+          // 创建主流货种趋势2表
+          if (!db.objectStoreNames.contains(GOODSTREND2))
+          {
+
+            var objectStore = db.createObjectStore(GOODSTREND2 , {keyPath:"id" , autoIncrement:true} );
+            console.log( "创建主流货种趋势2表" , objectStore );
+
+          }
+          else
+          {
+            console.log('exists');
+
+          }
+
+          // 创建主流货种趋势3表
+          if (!db.objectStoreNames.contains(GOODSTREND3))
+          {
+
+            var objectStore = db.createObjectStore(GOODSTREND3 , {keyPath:"id" , autoIncrement:true} );
+            console.log( "创建主流货种趋势3表" , objectStore );
+
+          }
+          else
+          {
+            console.log('exists');
+
+          }
+
+
+          // 创建运输订单表
+          if (!db.objectStoreNames.contains( TRANSORDER ))
+          {
+
+            var objectStore = db.createObjectStore( TRANSORDER , {keyPath:"id" , autoIncrement:true} );
+            console.log( "创建运输订单表" , objectStore );
+
+          }
+          else
+          {
+            console.log('exists');
+
+          }
+
+          // 创建经纬度
+          if (!db.objectStoreNames.contains( JINGWEIDU ))
+          {
+
+            var objectStore = db.createObjectStore( JINGWEIDU , {keyPath:"id" , autoIncrement:true} );
+            console.log( "创建经纬度表" , objectStore );
+
+          }
+          else
+          {
+            console.log('exists');
+
+          }
+
+          // 创建历史交易表
+          if (!db.objectStoreNames.contains( LISHIJIAOYILIANG ))
+          {
+
+            var objectStore = db.createObjectStore( LISHIJIAOYILIANG , {keyPath:"id" , autoIncrement:true} );
+            console.log( "创建历史交易表" , objectStore );
+
+          }
+          else
+          {
+            console.log('exists');
+
+          }
+
+          // 创建船舶表
+          if (!db.objectStoreNames.contains( SHIPS ))
+          {
+
+            var objectStore = db.createObjectStore( SHIPS , {keyPath:"id" , autoIncrement:true} );
+            console.log( "创建船舶表" , objectStore );
+
+          }
+          else
+          {
+            console.log('exists');
+
+          }
+
+          // 创建指数表
+          if (!db.objectStoreNames.contains( ZHISHU ))
+          {
+
+            var objectStore = db.createObjectStore( ZHISHU , {keyPath:"id" , autoIncrement:true} );
+            console.log( "创建指数表" , objectStore );
+
+          }
+          else
+          {
+            console.log('exists');
+
+          }
+
+          // 创建运价价格表
+          if (!db.objectStoreNames.contains( PRICE ))
+          {
+
+            var objectStore = db.createObjectStore( PRICE , {keyPath:"id" , autoIncrement:true} );
+            console.log( "创建运价价格表" , objectStore );
+
+          }
+          else
+          {
+            console.log('exists');
+
+          }
+
+
+
+          // LISHIJIAOYILIANG
+
+
+        };
+
+
+
+        // 添加交易总量数据
+        function addTotalTrading( obj )
+        {
+            db.transaction([ TOTALTRADING ] , "readwrite").objectStore( TOTALTRADING ).add( obj )
+            .onsuccess = function(event) {
+                console.log(event.target.result);
+            };
+        }
+
+        // 添加货种分布数据
+        function addGoodsDis( arr )
+        {
+            let store = db.transaction([ GOODSDISTRIBUTION ] , "readwrite").objectStore( GOODSDISTRIBUTION )
+
+            for( let i  in arr )
+            {
+                store.add( arr[i] );
+            }
+            // .add( obj )
+            // .onsuccess = function(event) {
+            //     console.log(event.target.result);
+            // };
+        }
+
+
+
+        // 添加主流货种趋势1
+        function addGoodsTrend1( arr )
+        {
+            let store = db.transaction([ GOODSTREND1 ] , "readwrite").objectStore( GOODSTREND1 )
+
+            for( let i  in arr )
+            {
+                store.add( arr[i] );
+            }
+            // .add( obj )
+            // .onsuccess = function(event) {
+            //     console.log(event.target.result);
+            // };
+        }
+
+        // 添加主流货种趋势2
+        function addGoodsTrend2( arr )
+        {
+            let store = db.transaction([ GOODSTREND2 ] , "readwrite").objectStore( GOODSTREND2 )
+
+            for( let i  in arr )
+            {
+                store.add( arr[i] );
+            }
+            // .add( obj )
+            // .onsuccess = function(event) {
+            //     console.log(event.target.result);
+            // };
+        }
+
+        // 添加主流货种趋势3
+        function addGoodsTrend3( arr )
+        {
+            let store = db.transaction([ GOODSTREND3 ] , "readwrite").objectStore( GOODSTREND3 )
+
+            for( let i  in arr )
+            {
+                store.add( arr[i] );
+            }
+            // .add( obj )
+            // .onsuccess = function(event) {
+            //     console.log(event.target.result);
+            // };
+        }
+
+
+        // 添加主流货种趋势3
+        function addTransOrder( arr )
+        {
+            let store = db.transaction([ TRANSORDER ] , "readwrite").objectStore( TRANSORDER )
+
+            for( let i  in arr )
+            {
+                store.add( arr[i] );
+            }
+            // .add( obj )
+            // .onsuccess = function(event) {
+            //     console.log(event.target.result);
+            // };
+        }
+
+
+        // 添加经纬度数据
+        function addJingWeiDu( arr )
+        {
+            let store = db.transaction([ JINGWEIDU ] , "readwrite").objectStore( JINGWEIDU )
+
+            for( let i  in arr )
+            {
+                store.add( arr[i] );
+            }
+            // .add( obj )
+            // .onsuccess = function(event) {
+            //     console.log(event.target.result);
+            // };
+        }
+
+        // 添加历史交易量数据
+        function addLiShiJiaoYiLiang( arr )
+        {
+            let store = db.transaction([ LISHIJIAOYILIANG ] , "readwrite").objectStore( LISHIJIAOYILIANG )
+
+            for( let i  in arr )
+            {
+                store.add( arr[i] );
+            }
+            // .add( obj )
+            // .onsuccess = function(event) {
+            //     console.log(event.target.result);
+            // };
+        }
+
+        // 添加运输船舶数据
+        function addShips( arr )
+        {
+            let store = db.transaction([ SHIPS ] , "readwrite").objectStore( SHIPS )
+
+            for( let i  in arr )
+            {
+                store.add( arr[i] );
+            }
+            // .add( obj )
+            // .onsuccess = function(event) {
+            //     console.log(event.target.result);
+            // };
+        }
+
+        // 添加指数数据
+        function addZhiShu( arr )
+        {
+            let store = db.transaction([ ZHISHU ] , "readwrite").objectStore( ZHISHU )
+
+            for( let i  in arr )
+            {
+                store.add( arr[i] );
+            }
+            // .add( obj )
+            // .onsuccess = function(event) {
+            //     console.log(event.target.result);
+            // };
+        }
+
+        // 添加运价价格数据
+        function addPrice( arr )
+        {
+            let store = db.transaction([ PRICE ] , "readwrite").objectStore( PRICE )
+
+            for( let i  in arr )
+            {
+                store.add( arr[i] );
+            }
+            // .add( obj )
+            // .onsuccess = function(event) {
+            //     console.log(event.target.result);
+            // };
+        }
+
+        /************************数据库操作 end************************/
+
+
+        // 删除所有表的数据
+        function clearAll() 
+        {
+
+            let store ;
+
+            //删除存储空间全部记录
+            store = db.transaction(TOTALTRADING,'readwrite').objectStore(TOTALTRADING);store.clear();
+            store = db.transaction(GOODSDISTRIBUTION,'readwrite').objectStore(GOODSDISTRIBUTION);store.clear();
+            store = db.transaction(GOODSTREND1,'readwrite').objectStore(GOODSTREND1);store.clear();
+            store = db.transaction(GOODSTREND2,'readwrite').objectStore(GOODSTREND2);store.clear();
+            store = db.transaction(GOODSTREND3,'readwrite').objectStore(GOODSTREND3);store.clear();
+            store = db.transaction(TRANSORDER,'readwrite').objectStore(TRANSORDER);store.clear();
+            store = db.transaction(JINGWEIDU,'readwrite').objectStore(JINGWEIDU);store.clear();
+            store = db.transaction(LISHIJIAOYILIANG,'readwrite').objectStore(LISHIJIAOYILIANG);store.clear();
+            store = db.transaction(SHIPS,'readwrite').objectStore(SHIPS);store.clear();
+            store = db.transaction(ZHISHU,'readwrite').objectStore(ZHISHU);store.clear();
+            store = db.transaction(PRICE,'readwrite').objectStore(PRICE);store.clear();
+            
+            // console.log('已删除存储空间'+storename+'全部记录');
+
+    
+        } 
+        
+
+        
+        </script>
+    </body>
+</html>
+

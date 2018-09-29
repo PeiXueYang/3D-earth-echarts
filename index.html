@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>big data</title>
+    <script src="static/jquery.min.js"></script>
+    <script src="static/vue.js"></script>
+    <script src="static/echarts.min.js"></script>
+    <link rel="stylesheet" href="css/index.css">
+    <script src="static/js/xlsx.core.min.js"></script>
+    <link rel="stylesheet" href="css/left.css">
+    <link rel="stylesheet" href="css/wzz.css">
+    <link rel="stylesheet" href="css/right.css">
+</head>
+<body>
+    <div id="app">
+        <div id="echart"></div>
+        <div class="content">
+            <div class="nav">
+                <div class="logo-div">
+                    <div class="data-left"><img src="static/images/logo.png" alt="logo"></div>
+                    <div class="data-center">
+                        <span>{{title}}</span>
+                    </div>
+                    <div class="data-right">
+                        <span class="span span1">{{date}}</span>
+                        <span class="span span2">丨</span>
+                        <span class="span span3"><img src="static/images/weather.png" alt="weather"></span>
+                        <span class="span span4">{{city}}</span>
+                    </div>
+                </div>
+                <div class="top-data info">
+                    <div class="info-div">
+                        <span class="info-title">{{info_title}} <span class="info-title">{{xlsxData[0]}}</span>
+                        </span><br>
+                        <span class="info-data">{{totalTrading}}</span><span class="info-ton"> 吨</span>
+                    </div>
+                </div>
+            </div>
+            <div class="fa-lr">
+                <div class="sec">
+                    <div id="left">
+                        <div id="leftApp">
+                            <div class="title">分货种运输趋势</div>
+                            <div class="fa-out">
+                                <div class="fa-hz">
+                                    <div class="p1">货种分布图</div>
+                                    <div class="fa-echarts" id="container"></div>
+                                </div>
+                                <div class="zhuliu">
+                                    <span style="float: left;">主流货种趋势</span>
+                                    <img src="./static/images/food.png" alt="" class="icon">
+                                    <span style="float: right;margin-right: 30px;">粮食</span>
+                                </div>
+                                    <div class="fa-exl" id="exl"></div>
+                                <!-- <div class="zhuliu">
+                                    <img src="./static/images/coal.png" alt="" class="icon">
+                                    <span style="float: right;margin-right: 30px;">煤炭</span>
+                                </div> -->
+                                <div class="po"> 
+                                    <div class="zl">
+                                        <img src="./static/images/coal.png" alt="" class="icon">
+                                        <span style="float: right;margin-right: 30px;">煤炭</span>
+                                    </div>
+                                    <div class="fa-exl" id="exl1"></div> 
+                                </div>
+                                <div class="po">
+                                    <div class="zl">
+                                        <img src="./static/images/stone.png" alt="" class="icon">
+                                        <span style="float: right;margin-right: 30px;">矿石</span>
+                                    </div>
+                                    <div class="fa-exl" id="exl2"></div>
+                                </div>   
+                            </div>
+                            <div class="left_fa-bottom">
+                                <div class="fa-order">运输订单</div>
+                                <div class="fa-sec">
+                                    <div>货种</div>
+                                    <div>航线</div>
+                                    <div>吨位</div>
+                                </div>
+                                <section class="left_section" id="box">
+                                    <div id="con1">
+                                        <div class="fa-sec" v-for='(item,index) in transportOrder'>
+                                            <div>{{item.good}}</div>
+                                            <div>{{item.loading}}-{{item.discharge}}</div>
+                                            <div>{{item.ton}}</div>
+                                        </div>
+                                    </div>
+                                    <div id='con2'></div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="right">
+                            <div id="right-wzh">
+                                <div class="right-top">
+                                    <div>
+                                        <div class="son">历史交易量</div>
+                                        <div class="son1">2018/09/09</div>
+                                        <div class="son2"><span class="sp1">1200吨</span><span class="sp2"></span><span class="sp3">-1.2%</span></div>
+                                    </div>
+                                    <div>
+                                        <div class="son1">2018/09/09</div>
+                                        <div class="son2"><span class="sp1">1200吨</span><span class="sp2"></span><span class="sp3">+1.2%</span></div>
+                                    </div>
+                                    <div>
+                                        <div class="son1">2018/09/09</div>
+                                        <div class="son2"><span class="sp1">1200吨</span><span class="sp2"></span><span class="sp3">-1.2%</span></div>
+                                    </div>
+                                </div>
+                                <div class="right-bottom">
+                                    <div class="fa-bottom">
+                                        <div class="fa-order"> 运输船舶</div>
+                                        <div class="fa-sec">
+                                            <div>船名</div>
+                                            <div>吨位</div>
+                                        </div>
+                                        <section class="section" id="box1">
+                                            <div id="con5">
+                                                <div class="fa-sec" v-for="item in ships">
+                                                    <div>{{item.ship}}</div>
+                                                    <div>{{item.ton}}</div>
+                                                </div>
+                                            </div>
+                                            <div id='con6'></div>
+                                        </section>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+            <div id="bottom">
+                <div class="bottom_warp clearfix" id="wrap">
+                    <div class="left">
+                        <div id="main" style="width: 100%;height:383px;"></div>
+                    </div>
+                    <div class="right">
+                        <div style="text-align: left; font-size:17px; font-weight: bold; margin-bottom: 30px;">运价价格表</div>
+                        <div class="unit">
+                            <div class="unit_header">
+                                <span @click="prevDateFun"><</span> 
+                                <span>{{datePrice}}</span>
+                                <span @click="nextDateFun">></span>
+                            </div>
+                            <div class="unit_content">
+                                <div class="line">
+                                    <span>航线</span>
+                                    <span>吨位</span>
+                                    <span>最低运价</span>
+                                    <span>涨跌</span>
+                                    <span>最高运价</span>
+                                    <span>涨跌</span>
+                                </div>
+                                <div class="line" v-for="item in list">
+                                    <span>{{item.hangxian}}</span>
+                                    <span>{{item.ton}}</span>
+                                    <span>{{item.low}}</span>
+                                    <span v-bind:style=" { color: item.offset1 > 0 ?'#931211':'#00f543'} ">{{item.offset1 >0 ?
+                                        `↑+${item.offset1}`:`↓${item.offset1}`}}</span>
+                                    <span>{{item.high}}</span>
+                                    <span v-bind:style=" { color: item.offset2 > 0 ?'#931211':'#00f543'} ">{{item.offset2 >0 ?
+                                        `↑+${item.offset2}`:`↓${item.offset2}`}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="static/echarts.min.js"></script>
+    <script src="static/vue.js"></script>
+    <script>
+        $("#echart").html(
+        '<iframe scrolling="auto" frameborder="0" src="echart.html" style="width:100%;height:100%;"></iframe>');
+        var appwzh = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    title: "海易通航运大数据中心",
+                    xlsxData: [],
+                    date: "",
+                    city: "烟台 28/22",
+                    weather: {
+
+                    },
+                    info_title: "交易中心累计交易量",
+                    info_data: "",
+                    DB_NAME: "bigdata", // indexDB数据库名
+                    totalTrading: "", // 总交易量
+                    TOTALTRADING: "totalTrading", //总交易量表
+                    LISHIJIAOYILIANG: "lishijiaoyiliang", //历史交易量
+                    liShiJiaoYiLiang: [], //	历史交易量
+                    db: '',
+                    info_data: "59,623,000",
+                    /* bottom */
+                    list: [],
+                    datePrice: '',
+                    yDate: [],
+                    xDate: [],
+                    /* bottom */
+                    /* left */
+                    DB_NAME: 'bigdata',
+                    TRANSORDER: 'transOrder', //运输订单
+                    GOODSDISTRIBUTION: 'goodsDistribution', //货种分布表
+                    GOODSTREND1: 'goodsTrend1', //主流货种趋势1,
+                    GOODSTREND2: 'goodsTrend2', //主流货种趋势2,
+                    GOODSTREND3: 'goodsTrend3', //主流货种趋势3,
+                    db: '',
+                    transportOrder: [],
+                    goodsDistribution: [],
+                    goodsTrend1: [],
+                    goodsTrend2: [],
+                    goodsTrend3: [],
+                    speed: 50,
+                    /* left */
+                    /* right */
+                    // DB_NAME: "bigdata", // indexDB数据库名
+                    totalTrading: 0, // 总交易量
+                    TOTALTRADING: "totalTrading", //总交易量表
+                    LISHIJIAOYILIANG: "lishijiaoyiliang", //历史交易量
+                    liShiJiaoYiLiang: [], //	历史交易量
+                    db: '',
+                    SHIPS: "ships",
+                    ships: [],
+                    speed: 50,
+                    /* right */
+                }
+            },
+            methods: {
+                // 获取当前年月日 yyyy-MM-dd
+                getNowFormatDate() {
+                    var date = new Date();
+                    var seperator1 = "-";
+                    var year = date.getFullYear();
+                    var month = date.getMonth() + 1;
+                    var strDate = date.getDate();
+                    if (month >= 1 && month <= 9) {
+                        month = "0" + month;
+                    }
+                    if (strDate >= 0 && strDate <= 9) {
+                        strDate = "0" + strDate;
+                    }
+                    this.date = year + seperator1 + month + seperator1 + strDate;
+                },
+                /* left --start */
+                      //创建数据库连接
+                createdb() {
+                    var that = this
+                    // 连接数据库，没有就创建数据库
+                    var request = indexedDB.open(that.DB_NAME, 1);
+                    request.onsuccess = function (event) {
+                        that.db = request.result;
+                        console.log("success");
+                        that.getTransportOrder() //获取运输订单
+                        that.getGoodsMapData() //货种分布图
+                        that.getFoodsMap() //粮食
+                        that.coalMaps() // 煤炭
+                        that.stoneMaps() //铁矿
+                    }
+                    // 错误处理程序在这里。
+                    request.onerror = function (event) {
+                        console.log(event.target.error, 'errror');
+                    };
+                },
+                //获取运输订单数据
+                getTransportOrder() {
+                    var that = this
+                    var objectStore = that.db.transaction(that.TRANSORDER, 'readonly').objectStore(that.TRANSORDER);
+                    objectStore.openCursor().onsuccess = function (event) {
+                        var cursor = event.target.result;
+                        if (cursor) {
+                            that.transportOrder.push(cursor.value);
+                            cursor.continue();
+                        } else {
+                            //这里设置运输订单
+                            console.log("运输订单", that.transportOrder);
+                        }
+                    };
+                },
+                //获取货种分布图数据
+                getGoodsMapData() {
+                    var that = this
+                    var objectStore = that.db.transaction(that.GOODSDISTRIBUTION, 'readonly').objectStore(that.GOODSDISTRIBUTION);
+                    objectStore.openCursor().onsuccess = function (event) {
+                        var cursor = event.target.result;
+                        if (cursor) {
+                            that.goodsDistribution.push(cursor.value);
+                            cursor.continue();
+                        } else {
+                            //这里设置运输订单
+                            console.log("货种分布", that.goodsDistribution);
+                            let data = []
+                            let hzName = []
+                            for (let i in that.goodsDistribution) {
+                                hzName.push(that.goodsDistribution[i]['good'])
+                                data.push({
+                                    name: that.goodsDistribution[i]['good'],
+                                    value: that.goodsDistribution[i]['ton']
+                                })
+                            }
+                            that.handleHZmap(data, hzName)
+                        }
+                    };
+                },
+                // 处理货种 echarts
+                handleHZmap(params, legendData) {
+                    var dom = document.getElementById("container");
+                    var myChart = echarts.init(dom);
+                    var app = {};
+                    option = null;
+                    option = {
+                        color: ['#47d3cd', '#757678', '#af8948', '#9fc1b1', '#bbaaa3', '#ae5954', '#3d4a53', '#c8cdd1',
+                            'acd0c2', 'acd0c2'
+                        ],
+                        legend: {
+                            orient: 'horizontal', // 'vertical'//horizontal
+                            x: '0',
+                            data: legendData,
+                            icon: "rect",
+                            itemGap: 10,
+                            textStyle: {
+                                color: '#fff'
+                            }
+                        },
+                        series: [{
+                            breadcrumb: {
+                                show: false,
+                            },
+                            type: 'treemap',
+                            roam: false,
+                            data: params
+                        }]
+                    };;
+                    if (option && typeof option === "object") {
+                        myChart.setOption(option, true);
+                    }
+                },
+                // 粮食散点图
+                getFoodsMap() {
+                    var that = this
+                    var objectStore = that.db.transaction(that.GOODSTREND1, 'readonly').objectStore(that.GOODSTREND1);
+                    objectStore.openCursor().onsuccess = function (event) {
+                        var cursor = event.target.result;
+                        if (cursor) {
+                            that.goodsTrend1.push(cursor.value);
+                            cursor.continue();
+                        } else {
+                            //这里设置运输订单
+                            // console.log( "货种趋势1" , that.goodsTrend1 );
+                            let data = []
+                            let date = []
+                            for (let i in that.goodsTrend1) {
+                                let year = String(that.goodsTrend1[i]['date']).substring(0, 4)
+                                let month = String(that.goodsTrend1[i]['date']).substring(4, 6)
+                                let day = String(that.goodsTrend1[i]['date']).substring(6, 8)
+                                let newDate = year + '/' + month + '/' + day
+                                date.push(newDate)
+                                data.push(that.goodsTrend1[i]['ton'])
+                            }
+                            that.handleFoodmap(data, date)
+                        }
+                    };
+                },
+                //处理粮食 echarts
+                handleFoodmap(data, date) {
+                    var dom1 = document.getElementById("exl");
+                    var myChart = echarts.init(dom1);
+                    var app = {};
+                    option = null;
+                    var base = +new Date(2017, 3, 3);
+                    var oneDay = 24 * 3600 * 1000;
+                    option = {
+                        grid: {
+                            top: 20,
+                        },
+                        backgroundColor: 'rgba(0, 0, 2, 0.7)',
+                        xAxis: {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: date,
+                            axisLine: {
+                                show: true,
+                                textStyle: {
+                                    color: '#fff'
+                                },
+                                lineStyle: {
+                                    color: '#fff'
+                                }
+                            },
+                            splitLine: {
+                                show: false,
+                            }
+                        },
+                        yAxis: {
+                            splitNumber: 2,
+                            type: 'value',
+                            boundaryGap: [0, '100%'],
+                            splitLine: {
+                                show: false,
+                            },
+                            axisLine: {
+                                show: true,
+                                textStyle: {
+                                    color: '#fff'
+                                },
+                                lineStyle: {
+                                    color: '#fff'
+                                }
+                            }
+                        },
+                        dataZoom: [{
+                            type: 'inside',
+                            start: 0,
+                            end: 10
+                        }, {
+                            start: 0,
+                            end: 10,
+                            handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                            handleSize: '60%',
+                            handleStyle: {
+                                color: '#fff',
+                                shadowBlur: 3,
+                                shadowColor: 'rgba(0, 0, 0, 0.6)',
+                                shadowOffsetX: 0,
+                                shadowOffsetY: 0
+                            }
+                        }],
+                        series: [{
+                            name: '模拟数据',
+                            type: 'line',
+                            smooth: true,
+                            symbol: 'none',
+                            sampling: 'average',
+                            itemStyle: {
+                                color: '#1597c4'
+                            },
+                            areaStyle: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                    offset: 0,
+                                    color: '#3dfcf2'
+                                }, {
+                                    offset: 1,
+                                    color: '#108bc1'
+                                }])
+                            },
+                            data: data,
+                            labelLine: {
+                                normal: {
+                                    show: false
+                                }
+                            }
+                        }]
+                    };;
+                    if (option && typeof option === "object") {
+                        myChart.setOption(option, true);
+                    }
+
+
+                },
+                //煤炭散点图
+                coalMaps() {
+                    var that = this
+                    var objectStore = that.db.transaction(that.GOODSTREND2, 'readonly').objectStore(that.GOODSTREND2);
+                    objectStore.openCursor().onsuccess = function (event) {
+                        var cursor = event.target.result;
+                        if (cursor) {
+                            that.goodsTrend2.push(cursor.value);
+                            cursor.continue();
+                        } else {
+                            //这里设置运输订单
+                            // console.log( "货种趋势2" , that.goodsTrend2 );
+                            let data = []
+                            let date = []
+                            for (let i in that.goodsTrend2) {
+                                let year = String(that.goodsTrend1[i]['date']).substring(0, 4)
+                                let month = String(that.goodsTrend1[i]['date']).substring(4, 6)
+                                let day = String(that.goodsTrend1[i]['date']).substring(6, 8)
+                                let newDate = year + '/' + month + '/' + day
+                                date.push(newDate)
+                                data.push(that.goodsTrend1[i]['ton'])
+                            }
+                            that.handlecoalmap(data, date)
+                        }
+                    };
+                },
+                //处理煤炭 echarts
+                handlecoalmap(data, date) {
+                    var dom2 = document.getElementById("exl1");
+                    var myChart = echarts.init(dom2);
+                    var app = {};
+                    option = null;
+                    var base = +new Date(2017, 3, 3);
+                    var oneDay = 24 * 3600 * 1000;
+                    option = {
+                        grid: {
+                            top: 20,
+                        },
+                        backgroundColor: 'rgba(0, 0, 2, 0.7)',
+                        xAxis: {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: date,
+                            axisLine: {
+                                show: true,
+                                textStyle: {
+                                    color: '#fff'
+                                },
+                                lineStyle: {
+                                    color: '#fff'
+                                }
+                            },
+                            splitLine: {
+                                show: false,
+                            }
+                        },
+                        yAxis: {
+                            splitNumber: 2,
+                            type: 'value',
+                            boundaryGap: [0, '100%'],
+                            splitLine: {
+                                show: false,
+                            },
+                            axisLine: {
+                                show: true,
+                                textStyle: {
+                                    color: '#fff'
+                                },
+                                lineStyle: {
+                                    color: '#fff'
+                                }
+                            }
+                        },
+                        dataZoom: [{
+                            type: 'inside',
+                            start: 0,
+                            end: 10
+                        }, {
+                            start: 0,
+                            end: 10,
+                            handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                            handleSize: '60%',
+                            handleStyle: {
+                                color: '#fff',
+                                shadowBlur: 3,
+                                shadowColor: 'rgba(0, 0, 0, 0.6)',
+                                shadowOffsetX: 0,
+                                shadowOffsetY: 0
+                            }
+                        }],
+                        series: [{
+                            name: '模拟数据',
+                            type: 'line',
+                            smooth: true,
+                            symbol: 'none',
+                            sampling: 'average',
+                            itemStyle: {
+                                color: '#1597c4'
+                            },
+                            areaStyle: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                    offset: 0,
+                                    color: '#3dfcf2'
+                                }, {
+                                    offset: 1,
+                                    color: '#108bc1'
+                                }])
+                            },
+                            data: data,
+                            labelLine: {
+                                normal: {
+                                    show: false
+                                }
+                            }
+                        }]
+                    };
+                    if (option && typeof option === "object") {
+                        myChart.setOption(option, true);
+                    }
+
+
+                },
+                //矿石散点图
+                stoneMaps() {
+                    var that = this
+                    var objectStore = that.db.transaction(that.GOODSTREND3, 'readonly').objectStore(that.GOODSTREND3);
+                    objectStore.openCursor().onsuccess = function (event) {
+                        var cursor = event.target.result;
+                        if (cursor) {
+                            that.goodsTrend3.push(cursor.value);
+                            cursor.continue();
+                        } else {
+                            //这里设置运输订单
+                            // console.log( "货种趋势3" , that.goodsTrend3 );
+                            let data = []
+                            let date = []
+                            for (let i in that.goodsTrend2) {
+                                let year = String(that.goodsTrend1[i]['date']).substring(0, 4)
+                                let month = String(that.goodsTrend1[i]['date']).substring(4, 6)
+                                let day = String(that.goodsTrend1[i]['date']).substring(6, 8)
+                                let newDate = year + '/' + month + '/' + day
+                                date.push(newDate)
+                                data.push(that.goodsTrend1[i]['ton'])
+                            }
+                            that.handleStonemap(data, date)
+                        }
+                    };
+                },
+                //处理矿石 echarts
+                handleStonemap(data, date) {
+                    var dom3 = document.getElementById("exl2");
+                    var myChart = echarts.init(dom3);
+                    var app = {};
+                    option = null;
+                    var base = +new Date(2017, 3, 3);
+                    var oneDay = 24 * 3600 * 1000;
+                    option = {
+                        grid: {
+                            top: 20,
+                        },
+                        backgroundColor: 'rgba(0, 0, 2, 0.7)',
+                        xAxis: {
+                            type: 'category',
+                            boundaryGap: false,
+                            data: date,
+                            axisLine: {
+                                show: true,
+                                textStyle: {
+                                    color: '#fff'
+                                },
+                                lineStyle: {
+                                    color: '#fff'
+                                }
+                            },
+                            splitLine: {
+                                show: false,
+                            }
+                        },
+                        yAxis: {
+                            splitNumber: 2,
+                            type: 'value',
+                            boundaryGap: [0, '100%'],
+                            splitLine: {
+                                show: false,
+                            },
+                            axisLine: {
+                                show: true,
+                                textStyle: {
+                                    color: '#fff'
+                                },
+                                lineStyle: {
+                                    color: '#fff'
+                                }
+                            }
+                        },
+                        dataZoom: [{
+                            type: 'inside',
+                            start: 0,
+                            end: 10
+                        }, {
+                            start: 0,
+                            end: 10,
+                            handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                            handleSize: '60%',
+                            handleStyle: {
+                                color: '#fff',
+                                shadowBlur: 3,
+                                shadowColor: 'rgba(0, 0, 0, 0.6)',
+                                shadowOffsetX: 0,
+                                shadowOffsetY: 0
+                            }
+                        }],
+                        series: [{
+                            name: '模拟数据',
+                            type: 'line',
+                            smooth: true,
+                            symbol: 'none',
+                            sampling: 'average',
+                            itemStyle: {
+                                color: '#1597c4'
+                            },
+                            areaStyle: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                    offset: 0,
+                                    color: '#3dfcf2'
+                                }, {
+                                    offset: 1,
+                                    color: '#108bc1'
+                                }])
+                            },
+                            data: data,
+                            labelLine: {
+                                normal: {
+                                    show: false
+                                }
+                            }
+                        }]
+                    };;
+                    if (option && typeof option === "object") {
+                        myChart.setOption(option, true);
+                    }
+                },
+                /* left --end */
+                /* right --start */
+                // 获取总货运量
+                getTotal() {
+                    let that = this;
+                    var objectStore = that.db.transaction(that.TOTALTRADING, 'readonly').objectStore(that.TOTALTRADING);
+                    objectStore.openCursor().onsuccess = function (event) {
+                        var cursor = event.target.result;
+                        if (cursor) {
+                            that.totalTrading = cursor.value.amount
+                            //这里设置总交易量
+                            // console.log(that.totalTrading)
+                            // cursor.continue();
+                        } else {
+                            console.log('没有更多数据了！', that.totalTrading);
+                        }
+                    };
+
+                },
+
+                // 获取运输船舶
+                getShips() {
+                    let that = this;
+                    var objectStore = that.db.transaction(that.SHIPS, 'readonly').objectStore(that.SHIPS);
+                    objectStore.openCursor().onsuccess = function (event) {
+                        var cursor = event.target.result;
+                        if (cursor) {
+                            that.ships.push(cursor.value);
+                            cursor.continue();
+                        } else {
+                            // console.log('没有更多数据了！');
+
+                            //这里设置运输船舶
+                            console.log("运输船舶", that.ships);
+                            console.log(that.ships[0].ship);
+
+                        }
+                    };
+                }
+                /* right --end */
+                /* bottom --start */
+                    ,initEchart() {
+                        // console.log(this.xDate, ' this.xDate')
+                        var dom = document.getElementById("main");
+                        var myChart = echarts.init(dom);
+                        option = {
+                            tooltip: {
+                                trigger: 'axis',
+                                position: function (pt) {
+                                    return [pt[0], '10%'];
+                                }
+                            },
+                            title: {
+                                left: 12,
+                                text: '运价指数',
+                                textStyle: {
+                                    color: '#fff'
+                                }
+                            },
+                            xAxis: {
+                                type: 'category',
+                                boundaryGap: false,
+                                data: this.xDate,
+                                axisLine: {
+                                    onZero: false,
+                                    lineStyle: {
+                                        color: '#fff',
+                                    }
+                                },
+                            },
+                            yAxis: {
+                                type: 'value',
+                                boundaryGap: [0, '100%'],
+                                axisLine: {
+                                    onZero: false,
+                                    lineStyle: {
+                                        color: '#fff',
+                                    }
+                                },
+                                axisTick: {
+                                    show: false
+                                },
+                                splitLine: {
+                                    show: false
+                                }
+                            },
+                            dataZoom: [{
+                                type: 'inside',
+                                start: 0,
+                                end: 10
+                            }, {
+                                start: 0,
+                                end: 10,
+                                handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                                handleSize: '80%',
+                                handleStyle: {
+                                    color: '#fff',
+                                    shadowBlur: 3,
+                                    shadowColor: 'rgba(0, 0, 0, 0.6)',
+                                    shadowOffsetX: 2,
+                                    shadowOffsetY: 2
+                                }
+                            }],
+                            series: [
+                                {
+                                    name: '模拟数据',
+                                    type: 'line',
+                                    smooth: true,
+                                    symbol: 'none',
+                                    sampling: 'average',
+                                    itemStyle: {
+                                        color: '#1597c4'
+                                    },
+                                    areaStyle: {
+                                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                            offset: 0,
+                                            color: '#0e84bc'
+                                        }, {
+                                            offset: 1,
+                                            color: '#3222e6'
+                                        }])
+                                    },
+                                    data: this.yDate
+                                }
+                            ]
+                        };
+                        if (option && typeof option === "object") {
+                            myChart.setOption(option, true);
+                        }
+                    },
+                    formDate(date) {
+                        var year = date.getFullYear()
+                        var month = date.getMonth() + 1
+                        var day = date.getDate()
+                        var hour = date.getHours()
+                        var minute = date.getMinutes()
+                        var second = date.getSeconds()
+                        return `${year}/${month}/${day}`
+                    },
+                    addDate(date, days) {
+                        var d = new Date(date);
+                        console.log(d, 'new Date()')
+                        d.setDate(d.getDate() + days);
+                        var month = d.getMonth() + 1;
+                        var day = d.getDate();
+                        var val = d.getFullYear() + "/" + month + "/" + day;
+                        return val;
+                    },
+                    prevDate(date, days) {
+                        var d = new Date(date);
+                        d.setDate(d.getDate() - days);
+                        var month = d.getMonth() + 1;
+                        var day = d.getDate();
+                        var val = d.getFullYear() + "/" + month + "/" + day;
+                        return val;
+                    },
+                    prevDateFun() {
+                        this.datePrice = this.prevDate(this.datePrice, 1)
+                    },
+                    nextDateFun() {
+                        this.datePrice = this.addDate(this.datePrice, 1)
+                    },
+                    initFun() {
+                        let that = this;
+                        var zhiShu = [],//指数
+                            price = [] //运输价格
+                        /************************数据库操作 begin************************/
+                        const DB_NAME = "bigdata";
+                        const ZHISHU = "zhishu";//指数数据
+                        const PRICE = "price";//运价价格
+                        var db;
+                        // 连接数据库，没有就创建数据库
+                        var request = indexedDB.open(DB_NAME, 1);
+                        request.onsuccess = function (event) {
+                            db = request.result;
+                            console.log("success");
+
+                            //获取指数
+                            getZhiShu();
+
+                            //获取价格
+                            getPrice();
+
+                        }
+                        // 错误处理程序在这里。
+                        request.onerror = function (event) {
+                            console.log(event.target.error);
+                        };
+                        /**
+                         * 获取指数
+                         * @return {[type]} [description]
+                         */
+                        function getZhiShu() {
+                            var objectStore = db.transaction(ZHISHU, 'readonly').objectStore(ZHISHU);
+                            objectStore.openCursor().onsuccess = function (event) {
+                                var cursor = event.target.result;
+
+                                if (cursor) {
+
+                                    zhiShu.push(cursor.value);
+
+                                    cursor.continue();
+                                }
+                                else {
+                                    // console.log('没有更多数据了！');
+
+                                    //这里设置指数
+
+                                    // console.log("指数", zhiShu);
+                                    for (let i = 0; i < zhiShu.length; i++) {
+                                        that.xDate.push(zhiShu[i]['date'])
+                                        that.yDate.push(zhiShu[i]['index'])
+                                    }
+                                    that.initEchart();
+
+
+
+                                }
+                            };
+                        }
+
+                        /**
+                         * 获取价格
+                         * @return {[type]} [description]
+                         */
+                        function getPrice() {
+                            var objectStore = db.transaction(PRICE, 'readonly').objectStore(PRICE);
+
+                            objectStore.openCursor().onsuccess = function (event) {
+                                var cursor = event.target.result;
+
+                                if (cursor) {
+
+                                    price.push(cursor.value);
+
+                                    cursor.continue();
+                                }
+                                else {
+                                    // console.log('没有更多数据了！');
+
+                                    //这里设置价格
+                                    that.list = price;
+                                    console.log("价格", that.list);
+
+                                }
+                            };
+                        }
+                    }
+                /* bottom --end */
+                /* top */
+                ,getdb() {
+                    // 连接数据库，没有就创建数据库
+                    var that = this
+                    var request = indexedDB.open(that.DB_NAME, 1);
+
+                    request.onsuccess = function (event) {
+
+                        that.db = request.result;
+                        console.log("success");
+                        that.getTotal();
+                        that.getShips();
+
+                    }
+                    // 错误处理程序在这里。
+                    request.onerror = function (event) {
+                        console.log(event.target.error);
+                    };
+
+
+                },
+                // 获取总货运量
+                getTotal() {
+                    let that = this;
+                    var objectStore = that.db.transaction(that.TOTALTRADING, 'readonly').objectStore(that.TOTALTRADING);
+                    objectStore.openCursor().onsuccess = function (event) {
+                        var cursor = event.target.result;
+                        if (cursor) {
+                            that.totalTrading = cursor.value.amount
+
+                        } else {
+                            console.log('没有更多数据了！', that.totalTrading);
+                        }
+                    };
+
+                },
+                /* top */
+            },
+            created() {
+                this.getNowFormatDate();
+                this.datePrice = this.formDate(new Date());
+                this.initFun();
+                this.getNowFormatDate()
+                this.getdb();
+                this.createdb();
+            },
+            mounted() {
+                /* left */
+                 setInterval(() => {
+                    var box = document.getElementById("box");
+                    var con1 = document.getElementById("con1");
+                    var con2 = document.getElementById("con2");
+                    con2.innerHTML = con1.innerHTML;
+                    if (box.scrollTop >= con1.scrollHeight) {
+                        box.scrollTop = 0;
+                    } else box.scrollTop++;
+                }, this.speed)
+                /* right */
+                setInterval(() => {
+                    var box1 = document.getElementById("box1");
+                    var con5 = document.getElementById("con5");
+                    var con6 = document.getElementById("con6");
+                    con6.innerHTML = con5.innerHTML;
+                    if (box1.scrollTop >= con6.scrollHeight) {
+                        box1.scrollTop = 0;
+                    } else box1.scrollTop++;
+                }, this.speed)
+            }
+        })
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,99 @@
+/* logo-div 样式 */
+.logo-div {
+    width: 100%;
+    /* padding: 0 7.8125vw; */
+    background-color: black;
+    color: #fff;
+}
+
+.logo-div>div {
+    display: inline-block;
+}
+
+/* LOGO div */
+.data-left {
+    margin-left: 7.8125vw;
+}
+
+.data-left img {
+    width: 13.1875vw;
+    position: relative;
+    top: 0.6vw;
+}
+
+/* 大数据中心 div */
+.data-center {
+    font-size: 2.5vw;
+    margin: 0 10vw;
+    position: relative;
+    left: 6.25vw;
+    line-height: 105px;
+}
+
+/* 日期 天气 城市 div */
+.data-right {
+    float: right;
+    line-height: 105px;
+    margin-right: 7.8125vw;
+}
+
+.span {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.span1 {
+    font-size: 1.25vw;
+}
+
+.span2 {
+    font-size: 2.5625vw
+}
+
+.span3 img {
+    height: 1.5625vw;
+
+}
+
+.span4 {
+    font-size: 1.5625vw;
+    margin-left: 1.5625vw;
+}
+
+
+
+/* info-div 样式 */
+.info {
+    height: 105px;
+    background: linear-gradient(#3d3d3d, #111);
+    text-align: center;
+    padding-top: 10px;
+
+}
+
+.info-div {
+    margin: 0 auto;
+    width: 500px;
+}
+
+
+/* 交易中心标题 */
+.info-title {
+    color: #0095ff;
+    font-size: 20px;
+}
+
+/* 交易量 */
+.info-data {
+    color: #fff;
+    font-size: 40px;
+    text-shadow: 0 0 30px #fff;
+
+}
+
+/* 吨 */
+.info-ton {
+    font-size: 30px;
+    color: #fff;
+    text-shadow: 0 0 30px #fff;
+}

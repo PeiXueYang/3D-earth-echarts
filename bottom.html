@@ -1,0 +1,323 @@
+<style>
+    *{
+        margin:0;
+        padding: 0;
+    }
+    html{
+        background: rgba(255, 255, 255, 0.15);
+    }
+    .clearfix:after{
+        clear: both;
+        content: "";
+        display: block;
+    }
+    .bottom_warp{
+        padding-left: 8%;
+        padding-right: 8%;
+        padding-top: 44px;
+    }
+    .left,.right{
+        float:left;
+        width: 50%;
+        box-sizing: border-box;
+    }
+    .right{
+        text-align: center;
+        color: #fff;
+    }
+    .unit{
+        border: 2px solid #fff;
+    }
+    .unit_content{
+        padding: 14px 20px;
+    }
+   .unit_header{
+       line-height: 40px;
+       height: 40px;
+       padding-left: 20px;
+       padding-right:20px;
+       background: rgba(0, 0, 0, 0.4)
+   }
+   .unit_header span:first-child{
+       float: left;
+       border-width: bold;
+   }
+   .unit_header span:last-child{
+       float: right;
+       border-width: bold;
+   }
+    .line span{
+        display: inline-block;
+        width: 15%;
+        line-height: 30px;
+        height: 30px;
+    }
+</style>
+<div class="bottom_warp clearfix" id="wrap">
+    <div class="left">
+        <div id="main" style="width: 100%;height:383px;"></div>
+    </div>
+    <div class="right">
+        <div style="text-align: left; font-size:17px; font-weight: bold; margin-bottom: 30px;">运价价格表</div>
+        <div class="unit">
+            <div class="unit_header">
+                <span @click="prevDateFun"><</span>
+                <span>{{date}}</span>
+                <span @click="nextDateFun">></span>
+            </div>
+            <div class="unit_content">
+                <div class="line">
+                    <span>航线</span>
+                    <span>吨位</span>
+                    <span>最低运价</span>
+                    <span>涨跌</span>
+                    <span>最高运价</span>
+                    <span>涨跌</span>
+                </div>
+                <div class="line" v-for="item in list">
+                    <span>{{item.hangxian}}</span>
+                    <span>{{item.ton}}</span>
+                    <span>{{item.low}}</span>
+                    <span v-bind:style=" { color: item.offset1 > 0 ?'#931211':'#00f543'} ">{{item.offset1 >0 ? `↑+${item.offset1}`:`↓${item.offset1}`}}</span>
+                    <span>{{item.high}}</span>
+                    <span v-bind:style=" { color: item.offset2 > 0 ?'#931211':'#00f543'} ">{{item.offset2 >0 ? `↑+${item.offset2}`:`↓${item.offset2}`}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="static/echarts.min.js"></script>
+<script src="static/vue.js"></script>
+<script>
+
+(function(){
+    var app = new Vue({
+        el: '#wrap',
+        data: {
+            message: 'Hello Vue!',
+            list:[],
+            date:'',
+            yDate:[],
+            xDate:[],
+        },
+        methods:{
+            initEchart(){
+                console.log(this.xDate,' this.xDate')
+                var dom = document.getElementById("main");
+                var myChart = echarts.init(dom);
+                option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        position: function (pt) {
+                            return [pt[0], '10%'];
+                        }
+                    },
+                    title: {
+                        left: 12,
+                        text: '运价指数',
+                        textStyle: {
+                            color: '#fff'
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: this.xDate,
+                        axisLine: {
+                            onZero: false,
+                            lineStyle: {
+                                color: '#fff',
+                            }
+                        },
+                    },
+                    yAxis: {
+                        type: 'value',
+                        boundaryGap: [0, '100%'],
+                        axisLine: {
+                            onZero: false,
+                            lineStyle: {
+                                color: '#fff',
+                            }
+                        },
+                        axisTick: {
+                            show: false
+                        },
+                        splitLine: {
+                            show: false
+                        }
+                    },
+                    dataZoom: [{
+                        type: 'inside',
+                        start: 0,
+                        end: 10
+                    }, {
+                        start: 0,
+                        end: 10,
+                        handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                        handleSize: '80%',
+                        handleStyle: {
+                            color: '#fff',
+                            shadowBlur: 3,
+                            shadowColor: 'rgba(0, 0, 0, 0.6)',
+                            shadowOffsetX: 2,
+                            shadowOffsetY: 2
+                        }
+                    }],
+                    series: [
+                        {
+                            name: '模拟数据',
+                            type: 'line',
+                            smooth: true,
+                            symbol: 'none',
+                            sampling: 'average',
+                            itemStyle: {
+                                color: '#1597c4'
+                            },
+                            areaStyle: {
+                                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                                    offset: 0,
+                                    color: '#0e84bc'
+                                }, {
+                                    offset: 1,
+                                    color: '#3222e6'
+                                }])
+                            },
+                            data: this.yDate
+                        }
+                    ]
+                };
+                if (option && typeof option === "object") {
+                    myChart.setOption(option, true);
+                }
+            },
+            formDate(date) {
+                var year = date.getFullYear()
+                var month = date.getMonth() + 1
+                var day = date.getDate()
+                var hour = date.getHours()
+                var minute = date.getMinutes()
+                var second = date.getSeconds()
+                return `${year}/${month}/${day}`
+            },
+            addDate(date, days) {
+                var d = new Date(date);
+                console.log(d,'new Date()')
+                d.setDate(d.getDate() + days);
+                var month = d.getMonth() + 1;
+                var day = d.getDate();
+                var val = d.getFullYear() + "/" + month + "/" + day;
+                return val;
+            },
+            prevDate(date, days) {
+                var d = new Date(date);
+                d.setDate(d.getDate() - days);
+                var month = d.getMonth()+1;
+                var day = d.getDate();
+                var val = d.getFullYear() + "/" + month + "/" + day;
+                return val;
+            },
+            prevDateFun(){
+                this.date = this.prevDate(this.date, 1)
+            },
+            nextDateFun(){
+                this.date =  this.addDate(this.date, 1)
+            },
+            initFun(){
+                let that = this;
+                var zhiShu = [],//指数
+                    price = [] //运输价格
+                /************************数据库操作 begin************************/
+                const DB_NAME = "bigdata";
+                const ZHISHU = "zhishu";//指数数据
+                const PRICE = "price";//运价价格
+                var db;
+                // 连接数据库，没有就创建数据库
+                var request = indexedDB.open(DB_NAME, 1);
+                request.onsuccess = function (event) {
+                    db = request.result;
+                    console.log("success");
+
+                    //获取指数
+                    getZhiShu();
+
+                    //获取价格
+                    getPrice();
+
+                }
+                // 错误处理程序在这里。
+                request.onerror = function (event) {
+                    console.log(event.target.error);
+                };
+                /**
+                 * 获取指数
+                 * @return {[type]} [description]
+                 */
+                function getZhiShu() {
+                    var objectStore = db.transaction(ZHISHU, 'readonly').objectStore(ZHISHU);
+                    objectStore.openCursor().onsuccess = function (event) {
+                        var cursor = event.target.result;
+
+                        if (cursor) {
+
+                            zhiShu.push(cursor.value);
+
+                            cursor.continue();
+                        }
+                        else {
+                            // console.log('没有更多数据了！');
+
+                            //这里设置指数
+
+                            console.log("指数", zhiShu);
+                            for (let i = 0; i < zhiShu.length; i++) {
+                                that.xDate.push(zhiShu[i]['date'])
+                                that.yDate.push(zhiShu[i]['index'])
+                            }
+                            that.initEchart();
+                            
+
+
+                        }
+                    };
+                }
+
+                /**
+                 * 获取价格
+                 * @return {[type]} [description]
+                 */
+                function getPrice() {
+                    var objectStore = db.transaction(PRICE, 'readonly').objectStore(PRICE);
+
+                    objectStore.openCursor().onsuccess = function (event) {
+                        var cursor = event.target.result;
+
+                        if (cursor) {
+
+                            price.push(cursor.value);
+
+                            cursor.continue();
+                        }
+                        else {
+                            // console.log('没有更多数据了！');
+
+                            //这里设置价格
+                            console.log("价格", price);
+                            that.list = price;
+
+                        }
+                    };
+                }
+                    }
+        },
+        created(){
+            this.date = this.formDate(new Date());
+        },
+        mounted(){
+            setTimeout(()=>{
+                this.initFun();
+
+            },0)
+        }
+    })
+})()
+</script>

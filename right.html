@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>right</title>
+	<script src="static/jquery.min.js"></script>
+	<script src="static/vue.js"></script>
+	<link rel="stylesheet" href="css/right.css">
+	<style>
+		.sp1 {
+			margin-right: 95px;
+		}
+
+		.sp3 {
+			color: red
+		}
+	</style>
+</head>
+
+<body>
+	<div class="right" id="right-wzh">
+		<div class="right-top">
+			<div>
+				<div class="son">历史交易量</div>
+				<div class="son1">2018/09/09</div>
+				<div class="son2"><span class="sp1">1200吨</span><span class="sp2"></span><span class="sp3">-1.2%</span></div>
+			</div>
+			<div>
+				<div class="son1">2018/09/09</div>
+				<div class="son2"><span class="sp1">1200吨</span><span class="sp2"></span><span class="sp3">+1.2%</span></div>
+			</div>
+			<div>
+				<div class="son1">2018/09/09</div>
+				<div class="son2"><span class="sp1">1200吨</span><span class="sp2"></span><span class="sp3">-1.2%</span></div>
+			</div>
+
+		</div>
+
+		<div class="right-bottom">
+			<div class="fa-bottom">
+				<div class="fa-order"> 运输船舶</div>
+				<div class="fa-sec">
+					<div>船名</div>
+					<div>吨位</div>
+				</div>
+				<section class="section" id="box1">
+					<div id="con5">
+						<div class="fa-sec" v-for="item in ships">
+							<div>{{item.ship}}</div>
+							<div>{{item.ton}}</div>
+						</div>
+					</div>
+					<div id='con6'></div>
+				</section>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		//
+		var appright = new Vue({
+			el: "#right-wzh",
+			data() {
+				return {
+					DB_NAME: "bigdata", // indexDB数据库名
+					totalTrading: 0, // 总交易量
+					TOTALTRADING: "totalTrading", //总交易量表
+					LISHIJIAOYILIANG: "lishijiaoyiliang", //历史交易量
+					liShiJiaoYiLiang: [], //	历史交易量
+					db: '',
+					SHIPS: "ships",
+					ships: [],
+					speed: 50,
+
+				}
+			},
+			mounted() {
+				setInterval(() => {
+					var box1 = document.getElementById("box1");
+					var con5 = document.getElementById("con5");
+					var con6 = document.getElementById("con6");
+					con6.innerHTML = con5.innerHTML;
+					if (box1.scrollTop >= con6.scrollHeight) {
+						box1.scrollTop = 0;
+					} else box1.scrollTop++;
+				}, this.speed)
+			},
+			methods: {
+				getdb() {
+					// 连接数据库，没有就创建数据库
+					var that = this
+					var request = indexedDB.open(that.DB_NAME, 1);
+
+					request.onsuccess = function (event) {
+
+						that.db = request.result;
+						console.log("success");
+						that.getTotal();
+						that.getShips()
+
+					}
+					// 错误处理程序在这里。
+					request.onerror = function (event) {
+						console.log(event.target.error);
+					};
+
+
+				},
+
+				// 获取总货运量
+				getTotal() {
+					let that = this;
+					var objectStore = that.db.transaction(that.TOTALTRADING, 'readonly').objectStore(that.TOTALTRADING);
+					objectStore.openCursor().onsuccess = function (event) {
+						var cursor = event.target.result;
+						if (cursor) {
+							that.totalTrading = cursor.value.amount
+							//这里设置总交易量
+							// console.log(that.totalTrading)
+							// cursor.continue();
+						} else {
+							console.log('没有更多数据了！', that.totalTrading);
+						}
+					};
+
+				},
+
+				// 获取运输船舶
+				getShips() {
+					let that = this;
+					var objectStore = that.db.transaction(that.SHIPS, 'readonly').objectStore(that.SHIPS);
+					objectStore.openCursor().onsuccess = function (event) {
+						var cursor = event.target.result;
+						if (cursor) {
+							that.ships.push(cursor.value);
+							cursor.continue();
+						} else {
+							// console.log('没有更多数据了！');
+
+							//这里设置运输船舶
+							console.log("运输船舶", that.ships);
+							console.log(that.ships[0].ship);
+
+						}
+					};
+				}
+
+
+			},
+			created() {
+				this.getdb()
+			}
+
+
+		})
+	</script>
+	<!-- <script>
+		var box = document.getElementById("box");
+		var con1 = document.getElementById("con1");
+		var con2 = document.getElementById("con2");
+		var speed = 60;
+		con2.innerHTML = con1.innerHTML;
+
+		function ScrollUp() {
+			if (box.scrollTop >= con1.scrollHeight) {
+				box.scrollTop = 0;
+			} else box.scrollTop++;
+		}
+		var i = setInterval("ScrollUp()", speed);
+	</script> -->
+</body>
+
+</html>

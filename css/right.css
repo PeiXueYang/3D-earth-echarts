@@ -1,0 +1,89 @@
+.sp1 {
+			margin-right: 95px;
+		}
+
+		.sp3 {
+			color: red
+		}
+.fa-bottom {
+    border: 1px solid #fff;
+    border-right: none;
+    margin-top: 10px;
+}
+
+.fa-order {
+    height: 36px;
+    line-height: 36px;
+    text-align: center;
+    color: #fff;
+    border-bottom: 1px solid #fff;
+    font-size: 16px;
+    font-family: Microsoft YaHei;
+}
+
+.fa-sec {
+    display: flex;
+    font-size: 14px;
+    font-family: Microsoft YaHei;
+    color: #fff;
+    text-align: center;
+    background: linear-gradient(rgba(61, 61, 61, 1), rgba(17, 17, 17, 0));
+    border-bottom: 1px solid #eee;
+}
+
+.fa-sec>div {
+    width: 49%;
+    height: 30px;
+    line-height: 30px;
+}
+
+
+.section {
+    max-height: 220px;
+    overflow: hidden;
+}
+
+/* 右侧边栏-上半部分样式   by  wzh */
+#right-wzh {
+    height: 770px;
+}
+
+.right-top {
+    color: #fff;
+    font-size: 16px;
+    text-align: center;
+    vertical-align: middle;
+    font-family: Microsoft YaHei;
+    font-weight: normal;
+
+}
+
+.son,
+.son1 {
+    background: linear-gradient(rgba(61, 61, 61, 1), rgba(17, 17, 17, 0));
+
+}
+
+.son {
+    height: 38px;
+    line-height: 38px;
+    border-bottom: 1px solid white;
+
+}
+
+.son1 {
+    height: 36px;
+    line-height: 36px;
+}
+
+.son2 {
+    height: 30px;
+    line-height: 30px;
+    border-top: 1px solid white;
+}
+
+.right-top>div {
+    border: 1px solid white;
+    border-right: none;
+    margin-bottom: 10px;
+}

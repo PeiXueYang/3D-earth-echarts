@@ -1,0 +1,105 @@
+#leftApp{
+	height: 800px;
+	background: linear-gradient(rgba(21, 21, 21, 1), rgba(7, 7, 7, 0));
+	padding: 0 1px;
+	box-sizing: border-box;
+}
+.fa-out{
+	border-bottom: 1px solid #fff;
+	border-top:  1px solid #fff;
+	border-right:  1px solid #fff;
+}
+.title{
+	text-align: center;
+	height: 30px;
+	font-size: 16px;
+	font-family: Microsoft YaHei;
+	line-height: 30px;
+	color: #fff;
+	border: 1px solid #fff;
+	border-left:  0;
+}
+.fa-hz{
+	height: 130px;
+	padding: 0 10px;
+	font-family: Microsoft YaHei;
+}
+.p1{
+	color: #fff;
+	font-size: 12px;
+	height: 25px;
+	line-height: 25px;
+}
+.fa-echarts{
+	height: 120px;
+	background: linear-gradient(rgba(31, 31, 31, 1), rgba(11, 11, 11, 0));
+}
+.fa-exl{
+	height: 110px;
+	font-family: Microsoft YaHei;
+	background: linear-gradient(rgba(81, 81, 81, 0.7), rgba(11, 11, 11, 0));
+}
+.zhuliu{
+	position: relative;
+	font-size: 12px;
+	color: #fff;
+	padding: 0 10px;
+	height: 30px;
+	line-height: 30px;
+}
+.icon{
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	right: 20px;
+	top: 5px;
+
+}
+.left_fa-bottom{
+	border: 1px solid #fff;
+	margin-top: 10px;
+	border-left: 0;
+}
+.fa-order{
+   height: 36px;
+   line-height: 36px;
+   text-align: center;
+   color: #fff;
+   border-bottom:1px solid #fff;
+   font-size: 16px;
+   font-family: Microsoft YaHei;
+}
+.fa-sec{
+    display: flex;
+    font-size: 14px;
+    font-family: Microsoft YaHei;
+    color: #fff;
+    text-align: center;
+    background: linear-gradient(rgba(61, 61, 61, 1), rgba(17, 17, 17, 0));
+    border-bottom:1px solid #eee;
+}
+.fa-sec>div{
+    width: 33%;
+    height: 30px;
+    line-height: 30px;
+}
+
+.left_section{
+	max-height: 120px;
+	overflow: hidden;
+
+}
+.po{
+	position: relative;
+}
+.zl{
+	display: inline-block;
+	position: absolute;
+	font-size: 12px;
+	color: #fff;
+	padding: 0 10px;
+	height: 30px;
+	line-height: 30px;
+	right: 0;
+	z-index: 8888888;
+}
